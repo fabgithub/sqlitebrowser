@@ -67,7 +67,10 @@ OSStatus GeneratePreviewForURL(void *thisInterface, QLPreviewRequestRef preview,
         [tables insertObject:@"sqlite_master" atIndex:0];
         
         NSMutableString *html = [[NSMutableString alloc] init];
-        [html appendString:@"<html><head>"CSS_STYLE"</head><body><table>"];
+        [html appendString:@"<html>"];
+        [html appendString:@"<meta http-equiv='Content-Type' content='text/html; charset=utf-8' />"];
+        [html appendString:@"<head>"CSS_STYLE"</head><body>"];
+        [html appendString:@"<table>"];
         for (NSString *table in tables)
         {
             NSString *query = runQuery([[NSString alloc] initWithFormat:@"select * from %@ limit 100", table], fdb);
@@ -112,7 +115,9 @@ NSString *runQuery(NSString *query, sqlite3 *fdb)
             NSMutableArray *row = [[NSMutableArray alloc] init];
             for(int i=0; i<count; i++)
             {
-                row[i] = [[NSString alloc] initWithFormat:@"%s", (char *)sqlite3_column_text(statement, i)];
+                char tmpStr[10000] = "";
+                snprintf(tmpStr, sizeof(tmpStr) - 1, "%s", (char *)sqlite3_column_text(statement, i));
+                row[i] = [[NSString alloc] initWithUTF8String:tmpStr];
             }
             [data addObject:row];
         }
